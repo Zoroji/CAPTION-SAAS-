@@ -1,0 +1,40 @@
+# Raw downloaded images (Ignore)
+RedditImages/
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.gif
+
+# RedCaps annotation JSON files (Ignore)
+annotations/
+
+# Node & Next.js dependencies / build output
+node_modules/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+.vercel/
+
+# macOS / System metadata
+__MACOSX/
+.DS_Store
+Thumbs.db
+
+# Python bytecode & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+ENV/
+
+# Explicitly include vectors directory and database files (Keep)
+!vectors/
+!vectors/embeddings.npy
+!vectors/image_ids.json
+!vectors/metadata.json
+
+# Large zip files
+*.zip
