@@ -503,6 +503,8 @@ def test_image(
     test_image_path: str,
     top_k: int = DEFAULT_TOP_K,
     json_output: bool = False,
+    min_score: float = 0.0,
+    require_caption: bool = True,
 ) -> List[Dict]:
     """
     Search similar Reddit images for a given query image and extract metadata.
@@ -526,32 +528,46 @@ def test_image(
     vector = vectorize_single_image(path)
 
     similarities = cosine_similarity(vector, matrix)
-    k = min(top_k, len(image_ids))
-    top_indices = np.argsort(similarities)[::-1][:k]
+    sorted_indices = np.argsort(similarities)[::-1]
 
     results = []
-    for rank, index in enumerate(top_indices, start=1):
+    rank = 1
+
+    for index in sorted_indices:
+        if len(results) >= top_k:
+            break
+
         img_id = image_ids[int(index)]
         score = float(similarities[int(index)])
+
+        if min_score > 0 and score < min_score:
+            continue
+
         meta = metadata.get(img_id, {})
+        caption = meta.get("caption", "") or meta.get("raw_caption", "")
+
+        # Skip entries with empty captions if require_caption is True
+        if require_caption and not caption.strip():
+            continue
 
         results.append({
             "rank": rank,
             "image_id": img_id,
             "similarity_score": round(score, 6),
             "subreddit": meta.get("subreddit", "unknown"),
-            "caption": meta.get("caption", ""),
+            "caption": caption,
             "raw_caption": meta.get("raw_caption", ""),
             "url": meta.get("url", ""),
             "score": meta.get("score", 0),
         })
+        rank += 1
 
     if json_output:
         llm_payload = [
             {
                 "similarity_score": r["similarity_score"],
                 "subreddit": r["subreddit"],
-                "caption": r["caption"] or r["raw_caption"],
+                "caption": r["caption"],
                 "score": r["score"],
             }
             for r in results
@@ -560,7 +576,8 @@ def test_image(
         return results
 
     print("\n" + "=" * 70, flush=True)
-    print(f"TOP {k} SEMANTIC MATCHES FOR: {path.name}", flush=True)
+    clean_name = path.name.encode('ascii', 'ignore').decode() or "Image"
+    print(f"TOP {len(results)} SEMANTIC MATCHES FOR: {clean_name}", flush=True)
     print("=" * 70, flush=True)
 
     for r in results:
@@ -570,6 +587,54 @@ def test_image(
 
     print("\n" + "-" * 70, flush=True)
     return results
+
+
+def show_stats() -> None:
+    """Print database statistics and list all available subreddits."""
+    from collections import Counter
+    metadata = load_metadata()
+    if not metadata:
+        print("[ERROR] No metadata found in vectors/metadata.json", flush=True)
+        return
+
+    sub_counts = Counter(v.get("subreddit", "unknown") for v in metadata.values())
+    print("\n" + "=" * 70, flush=True)
+    print(f"DATABASE STATISTICS (Total Images: {len(metadata)})", flush=True)
+    print("=" * 70, flush=True)
+    print(f"{'SUBREDDIT':<30} | {'IMAGE COUNT':<15} | {'PERCENTAGE'}")
+    print("-" * 70, flush=True)
+
+    for sub, count in sub_counts.most_common():
+        pct = (count / len(metadata)) * 100
+        print(f"r/{sub:<28} | {count:<15} | {pct:.1f}%", flush=True)
+
+    print("=" * 70 + "\n", flush=True)
+
+
+def search_subreddit(subreddit_name: str) -> None:
+    """Search if a subreddit exists in local vector metadata or raw annotations."""
+    query = subreddit_name.lower().strip()
+    if query.startswith("r/"):
+        query = query[2:]
+
+    # 1. Search in active vector database (vectors/metadata.json)
+    metadata = load_metadata()
+    vector_matches = [
+        v for v in metadata.values() if v.get("subreddit", "").lower() == query
+    ]
+
+    # 2. Search in raw RedCaps annotations (annotations/*.json)
+    json_files = get_json_files()
+    ann_matches = [
+        f.name for f in json_files if f.stem.rsplit("_", 1)[0].lower() == query
+    ]
+
+    print("\n" + "=" * 70, flush=True)
+    print(f"SEARCH RESULTS FOR SUBREDDIT: r/{query}", flush=True)
+    print("=" * 70, flush=True)
+    print(f"1. Active Vector DB (vectors/metadata.json):     {'FOUND (' + str(len(vector_matches)) + ' images)' if vector_matches else 'NOT FOUND'}")
+    print(f"2. Raw RedCaps Annotations (annotations/*.json): {'FOUND (' + str(len(ann_matches)) + ' year archives: ' + ', '.join(ann_matches) + ')' if ann_matches else 'NOT FOUND'}")
+    print("=" * 70 + "\n", flush=True)
 
 
 # ============================================================
@@ -608,10 +673,28 @@ def main():
     # Verify command
     subparsers.add_parser("verify", help="Verify mapping integrity")
 
+    # Stats command
+    subparsers.add_parser("stats", help="List all subreddits available in database")
+
+    # Search Subreddit command
+    search_parser = subparsers.add_parser("search-sub", help="Search if a subreddit exists in metadata or annotations")
+    search_parser.add_argument("name", type=str, help="Subreddit name (e.g. pics, cats, sneakers, abandoned)")
+
     # Test command
     test_parser = subparsers.add_parser("test", help="Test semantic similarity")
     test_parser.add_argument("image_path", type=str, help="Path to input test image")
     test_parser.add_argument("--top-k", type=int, default=DEFAULT_TOP_K, help="Number of top matches")
+    test_parser.add_argument(
+        "--min-score",
+        type=float,
+        default=0.0,
+        help="Minimum similarity score threshold (e.g. 0.55)",
+    )
+    test_parser.add_argument(
+        "--allow-empty-captions",
+        action="store_true",
+        help="Include matches that have empty text captions",
+    )
     test_parser.add_argument(
         "--json",
         dest="json_output",
@@ -638,8 +721,20 @@ def main():
     elif args.command == "verify":
         verify_mapping()
 
+    elif args.command == "stats":
+        show_stats()
+
+    elif args.command == "search-sub":
+        search_subreddit(args.name)
+
     elif args.command == "test":
-        test_image(args.image_path, top_k=args.top_k, json_output=args.json_output)
+        test_image(
+            args.image_path,
+            top_k=args.top_k,
+            json_output=args.json_output,
+            min_score=args.min_score,
+            require_caption=not args.allow_empty_captions,
+        )
 
 
 if __name__ == "__main__":
