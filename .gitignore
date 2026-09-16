@@ -1,13 +1,25 @@
-# Raw downloaded images (Ignore)
+# Large dataset directories & downloaded images
+datasets/
 RedditImages/
+instagram_data/
+instagram_data2/
 *.jpg
 *.jpeg
 *.png
 *.webp
 *.gif
 
-# RedCaps annotation JSON files (Ignore)
-annotations/
+# Vector indices & large binary files
+vectors/
+*.index
+*.npy
+*.bin
+*.pt
+*.pth
+
+# Large CSV & JSON result files
+*.csv
+*_results.json
 
 # Node & Next.js dependencies / build output
 node_modules/
@@ -16,7 +28,7 @@ frontend/.next/
 frontend/out/
 .vercel/
 
-# macOS / System metadata
+# macOS / Windows System metadata
 __MACOSX/
 .DS_Store
 Thumbs.db
@@ -30,11 +42,7 @@ __pycache__/
 venv/
 ENV/
 
-# Explicitly include vectors directory and database files (Keep)
-!vectors/
-!vectors/embeddings.npy
-!vectors/image_ids.json
-!vectors/metadata.json
-
-# Large zip files
+# Large archives
 *.zip
+*.tar.gz
+*.7z
