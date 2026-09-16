@@ -14,9 +14,9 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-print(f"now script is loading the CLIP MODEL DEVICE IS {DEVICE}")
+print(f"Loading CLIP model on DEVICE: {DEVICE}")
 model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to(DEVICE)
-processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32") # converts it into the exact format CLIP expects.
+processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 model.eval()  # Set model to evaluation mode 
 
 queue = []
@@ -30,16 +30,23 @@ for folder_name, csv_filename in folders_to_process:
     folder_path = os.path.join(DATASET_BASE, folder_name)
     csv_path = os.path.join(folder_path, csv_filename)
 
-    df = pd.read_csv(csv_path)
+    print(f"Reading {csv_filename}...")
+    # Read without assuming header names so both header and headerless CSVs work
+    df = pd.read_csv(csv_path, header=None)
 
     for _, row in df.iterrows():
-        rel_image_path = str(row['Image File']).strip()
-        caption = str(row['Caption']) if pd.notna(row["Caption"]) else ""
+        raw_path = str(row[1]).strip()
+        
+        # Skip header line if present
+        if raw_path.lower() in ["image file", "image_file", "image_path"]:
+            continue
+            
+        caption = str(row[2]).strip() if len(row) > 2 and pd.notna(row[2]) else ""
 
-        if not rel_image_path.endswith('.jpg'):
-            full_img_path = os.path.join(folder_path, rel_image_path + '.jpg')
+        if not raw_path.endswith('.jpg'):
+            full_img_path = os.path.join(folder_path, raw_path + '.jpg')
         else:
-            full_img_path = os.path.join(folder_path, rel_image_path)
+            full_img_path = os.path.join(folder_path, raw_path)
 
         if os.path.exists(full_img_path):
             image_id = f"{folder_name}/{os.path.basename(full_img_path)}"
@@ -50,13 +57,13 @@ for folder_name, csv_filename in folders_to_process:
                 "folder": folder_name
             })
 
-print(f"Total images to process: {len(queue)}")
+print(f"Total valid images queued: {len(queue)}")
 
 dimension = 512  # CLIP output embedding size (512 numbers)
 index = faiss.IndexFlatIP(dimension)  # IndexFlatIP = Dot Product / Cosine Similarity index
 metadata_store = []
 
-print(f"\n Starting vectorization of {len(queue)} valid images...")
+print(f"\n🚀 Starting vectorization of {len(queue)} valid images...")
 
 for i in range(0, len(queue), BATCH_SIZE):
     batch_items = queue[i:i+BATCH_SIZE]
@@ -78,17 +85,17 @@ for i in range(0, len(queue), BATCH_SIZE):
     # Preprocessing images
     inputs = processor(images=images, return_tensors="pt", padding=True).to(DEVICE)
 
-    # Now create the embeddings
+    # Generate embeddings
     with torch.no_grad():
         features = model.get_image_features(**inputs)
 
-    # Scale the embeddings to 1.0 range
+    # Scale embeddings to unit length (L2 norm)
     features = features / features.norm(dim=-1, keepdim=True)
 
-    # Convert the embeddings to float32 numpy array
+    # Convert embeddings to float32 numpy array
     embeddings_np = features.cpu().numpy().astype(np.float32)
 
-    # Finally add it to FAISS
+    # Add to FAISS and metadata
     index.add(embeddings_np)
     metadata_store.extend(valid_items)
 
