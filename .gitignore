@@ -39,6 +39,7 @@ __pycache__/
 *$py.class
 .pytest_cache/
 .venv/
+.env
 venv/
 ENV/
 
@@ -46,3 +47,4 @@ ENV/
 *.zip
 *.tar.gz
 *.7z
+.env
