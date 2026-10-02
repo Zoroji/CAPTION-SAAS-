@@ -64,8 +64,8 @@ export function ImageCursorTrail() {
 
   if (!mounted) {
     return (
-      <div className="relative w-full h-screen bg-black overflow-hidden flex items-center justify-center select-none">
-        <h1 className="text-white font-bold text-7xl sm:text-9xl tracking-widest z-10 pointer-events-none drop-shadow-2xl">
+      <div className="relative w-full h-[60vh] min-h-[400px] bg-black overflow-hidden flex items-center justify-center select-none">
+        <h1 className="text-white font-bold text-6xl sm:text-8xl tracking-widest z-10 pointer-events-none drop-shadow-2xl">
           CAPTION
         </h1>
       </div>
@@ -73,15 +73,18 @@ export function ImageCursorTrail() {
   }
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { clientX, clientY } = e;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
     const distance = Math.hypot(
-      clientX - lastPosRef.current.x,
-      clientY - lastPosRef.current.y
+      x - lastPosRef.current.x,
+      y - lastPosRef.current.y
     );
 
     // Spawn a new hero image when mouse moves > 55px
     if (distance > 55) {
-      lastPosRef.current = { x: clientX, y: clientY };
+      lastPosRef.current = { x, y };
 
       // Cycle rotationally through all 36 HERO images
       const nextImage = HERO_IMAGES[imageIndexRef.current % HERO_IMAGES.length];
@@ -89,8 +92,8 @@ export function ImageCursorTrail() {
 
       const newItem: TrailItem = {
         id: idCounterRef.current++,
-        x: clientX,
-        y: clientY,
+        x,
+        y,
         imageSrc: nextImage,
         rotation: (Math.random() - 0.5) * 30, // Random rotation between -15deg and 15deg
       };
@@ -107,7 +110,7 @@ export function ImageCursorTrail() {
   return (
     <div
       onMouseMove={handleMouseMove}
-      className="relative w-full h-screen bg-black overflow-hidden flex items-center justify-center select-none"
+      className="relative w-full h-[60vh] min-h-[400px] bg-black overflow-hidden flex items-center justify-center select-none"
     >
       {/* Framer Motion HERO Image Cursor Trail */}
       <AnimatePresence>
@@ -115,16 +118,16 @@ export function ImageCursorTrail() {
           <motion.div
             key={item.id}
             initial={{ opacity: 0, scale: 0.3, rotate: item.rotation }}
-            animate={{ opacity: 1, scale: 3, rotate: item.rotation }}
+            animate={{ opacity: 1, scale: 2.2, rotate: item.rotation }}
             exit={{ opacity: 0, scale: 0.4, transition: { duration: 0.3 } }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
             style={{
               position: 'absolute',
-              top: item.y - 80,
-              left: item.x - 80,
+              top: item.y - 70,
+              left: item.x - 70,
               pointerEvents: 'none',
             }}
-            className="w-40 h-40 rounded-xl overflow-hidden border-2 border-white/20 shadow-2xl bg-zinc-900"
+            className="w-36 h-36 rounded-xl overflow-hidden border-2 border-white/20 shadow-2xl bg-zinc-900"
           >
             <img
               src={item.imageSrc}
@@ -136,7 +139,7 @@ export function ImageCursorTrail() {
       </AnimatePresence>
 
       {/* Center Landing Page Text */}
-      <h1 className="text-white font-bold text-7xl sm:text-9xl tracking-widest z-10 pointer-events-none drop-shadow-2xl">
+      <h1 className="text-white font-bold text-6xl sm:text-8xl md:text-9xl tracking-widest z-10 pointer-events-none drop-shadow-2xl">
         CAPTION
       </h1>
     </div>
