@@ -9,9 +9,6 @@ instagram_data2/
 *.webp
 *.gif
 
-# Allow frontend public asset images to be committed
-!frontend/public/**
-
 # Vector indices & large binary files
 vectors/
 *.index
@@ -42,8 +39,8 @@ __pycache__/
 *$py.class
 .pytest_cache/
 .venv/
-recovery-codes.txt
 .env
+recovery-codes.txt
 venv/
 ENV/
 

@@ -61,7 +61,13 @@ export function ImageCursorTrail() {
 
   useEffect(() => {
     setMounted(true);
+    HERO_IMAGES.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    })
   }, []);
+
+
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -177,7 +183,7 @@ export function ImageCursorTrail() {
 
         {/* Hero Central Typography & High-End Content Architecture */}
         <div className="z-10 flex flex-col items-center text-center pointer-events-none max-w-4xl mx-auto py-12">
-          
+
           {/* Eyebrow Pill Tag */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
