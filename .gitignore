@@ -9,6 +9,9 @@ instagram_data2/
 *.webp
 *.gif
 
+# Explicitly track public asset for feed preview
+!frontend/public/instagram_post_sample.png
+
 # Vector indices & large binary files
 vectors/
 *.index
