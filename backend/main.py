@@ -2,11 +2,20 @@ import base64, io, json
 from pathlib import Path
 import faiss, numpy as np, torch, uvicorn
 from fastapi import FastAPI, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 from transformers import CLIPModel, CLIPProcessor
 from LLM_call import calling_LLM
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 VECTOR_DIR = Path(__file__).resolve().parent.parent / "vectors"
 INDEX_FILE = VECTOR_DIR / "instagram_faiss.index"

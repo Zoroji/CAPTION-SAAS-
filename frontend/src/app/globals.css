@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #050505;
+  --foreground: #f5f5f5;
+  --font-sans: var(--font-geist-sans, system-ui, -apple-system, sans-serif);
+  --font-mono: var(--font-geist-mono, monospace);
 }
 
 @theme inline {
@@ -12,36 +14,52 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (pointer: fine) {
+  body, button, a, input, select, textarea {
+    cursor: none !important;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Pure CSS Bar Loader Animation based on reference code */
+/* Ambient Radial Mesh Gradient Background */
+.bg-mesh-gradient {
+  background-image: 
+    radial-gradient(circle at 50% -20%, rgba(120, 119, 198, 0.15), transparent 70%),
+    radial-gradient(circle at 80% 60%, rgba(16, 185, 129, 0.08), transparent 50%),
+    radial-gradient(circle at 20% 80%, rgba(245, 158, 11, 0.06), transparent 50%);
+}
+
+/* Subtle Grid Texture */
+.bg-grid-pattern {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+/* Pure CSS Bar Loader Animation */
 @keyframes pureLoading {
-  0% {
-    height: 0.75rem;
-  }
-  30% {
+  0%, 30%, 70%, 100% {
     height: 0.75rem;
   }
   50% {
-    height: 2.75rem;
-  }
-  70% {
-    height: 0.75rem;
-  }
-  100% {
-    height: 0.75rem;
+    height: 2.5rem;
   }
 }
 
@@ -51,4 +69,11 @@ body {
   border-radius: 9999px;
   animation: pureLoading 1s infinite ease-in-out;
 }
+
+/* Custom Bezier Smooth Scroll & Focus Outline Reset */
+::selection {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
 
