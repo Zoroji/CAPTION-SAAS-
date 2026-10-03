@@ -41,7 +41,7 @@ export function WhyDifferentSection() {
                 <motion.span
                   initial={{ y: "120%", opacity: 0, rotate: 2 }}
                   whileInView={{ y: "0%", opacity: 1, rotate: 0 }}
-                  viewport={{ once: true, amount: 0.8 }}
+                  viewport={{ once: true, amount: 0.1 }}
                   transition={{
                     duration: 0.75,
                     delay: idx * 0.08,
