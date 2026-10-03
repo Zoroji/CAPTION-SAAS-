@@ -34,26 +34,16 @@ export function WhyDifferentSection() {
             AUTHENTIC VIBES VS GENERIC AI
           </div>
 
-          {/* Masked SplitText Word Reveal Heading */}
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white mb-6 leading-[1.15] flex flex-wrap justify-center">
-            {["Captions", "that", "actually", "sound", "like", "you"].map((word, idx) => (
-              <span key={idx} className="inline-block overflow-hidden align-top mr-[0.28em] py-1">
-                <motion.span
-                  initial={{ y: "120%", opacity: 0, rotate: 2 }}
-                  whileInView={{ y: "0%", opacity: 1, rotate: 0 }}
-                  viewport={{ once: true, amount: 0.1 }}
-                  transition={{
-                    duration: 0.75,
-                    delay: idx * 0.08,
-                    ease: [0.16, 1, 0.3, 1],
-                  }}
-                  className="inline-block origin-bottom-left"
-                >
-                  {word}
-                </motion.span>
-              </span>
-            ))}
-          </h2>
+          {/* Robust Animated Heading */}
+          <motion.h2
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white mb-6 leading-[1.15] text-center"
+          >
+            Captions that actually sound like you
+          </motion.h2>
           <p className="text-zinc-400 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
             Standard AI chatbots spam outdated hashtags and robotic phrases. CAPTION references <strong className="text-white font-semibold">320,000 real aesthetic posts</strong> to generate authentic Gen Z captions instantly.
           </p>
