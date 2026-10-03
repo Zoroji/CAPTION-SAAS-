@@ -1,0 +1,10 @@
+fastapi>=0.100.0
+uvicorn>=0.20.0
+python-multipart>=0.0.6
+torch>=2.0.0
+transformers>=4.30.0
+pillow>=9.5.0
+faiss-cpu>=1.7.4
+numpy>=1.24.0
+groq>=0.4.0
+python-dotenv>=1.0.0
