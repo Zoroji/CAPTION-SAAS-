@@ -9,8 +9,9 @@ instagram_data2/
 *.webp
 *.gif
 
-# Explicitly track public asset for feed preview
-!frontend/public/instagram_post_sample.png
+# Explicitly track all frontend public assets (hero images, icons, previews)
+!frontend/public/**
+frontend/public/RedditImages/
 
 # Raw intermediate ONNX export directory
 backend/onnx_clip/

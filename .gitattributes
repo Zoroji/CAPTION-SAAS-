@@ -9,3 +9,4 @@ vectors/* filter=lfs diff=lfs merge=lfs -text
 testing[[:space:]]img/* filter=lfs diff=lfs merge=lfs -text
 test[[:space:]]males* filter=lfs diff=lfs merge=lfs -text
 backend/onnx_clip_quantized/* filter=lfs diff=lfs merge=lfs -text
+frontend/public/** -filter -diff -merge
