@@ -1,13 +1,8 @@
----
-title: CAPTION AI
-emoji: 🏢
-colorFrom: purple
-colorTo: gray
-sdk: docker
-app_port: 7860
-pinned: false
-short_description: This is the backend server code for the Caption ai app
----
+# CAPTION AI - Monorepo
 
-# CAPTION AI Backend Server
-FastAPI backend engine with PyTorch CLIP vision models, FAISS vector index, and Groq LLM captioning.
+FastAPI backend engine (PyTorch CLIP, FAISS vector search, Groq LLM) + Next.js 15 frontend.
+
+## Project Structure
+- `frontend/`: Next.js frontend application (Deployed on Vercel)
+- `backend/`: FastAPI Python server (Deployed on Render)
+- `vectors/`: FAISS index & metadata dataset
