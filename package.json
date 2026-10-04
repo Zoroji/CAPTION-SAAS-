@@ -1,3 +1,5 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:870485df424b9ca44fd9ac581266cccd6087d42b515500850c05548b0cb087ba
-size 50
+{
+  "dependencies": {
+    "gsap": "^3.15.0"
+  }
+}
