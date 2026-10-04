@@ -42,10 +42,10 @@ export function WhyDifferentSection() {
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white mb-6 leading-[1.15] text-center"
           >
-            Captions that actually sound like you
+            Captions that actually sound like HUMAN
           </motion.h2>
           <p className="text-zinc-400 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
-            Standard AI chatbots spam outdated hashtags and robotic phrases. CAPTION references <strong className="text-white font-semibold">320,000 real aesthetic posts</strong> to generate authentic Gen Z captions instantly.
+            AI chatbots spam outdated hashtags and robotic phrases. CAPTION.AI references <strong className="text-white font-semibold">320,000 real aesthetic posts</strong> to generate authentic Gen Z captions instantly.
           </p>
         </div>
 

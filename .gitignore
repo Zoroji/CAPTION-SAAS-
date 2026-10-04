@@ -12,13 +12,7 @@ instagram_data2/
 # Explicitly track public asset for feed preview
 !frontend/public/instagram_post_sample.png
 
-# Vector indices & large binary files
-vectors/
-*.index
-*.npy
-*.bin
-*.pt
-*.pth
+
 
 # Large CSV & JSON result files
 *.csv

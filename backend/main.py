@@ -9,6 +9,12 @@ from LLM_call import calling_LLM
 
 app = FastAPI()
 
+allowed_origins = [
+     "http://localhost:3000",                  # Local Next.js dev server
+    "http://127.0.0.1:3000",                  # Alternative local loopback
+    "https://caption-saas-zorojis-projects.vercel.app", 
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
