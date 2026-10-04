@@ -7,3 +7,4 @@ numpy
 groq
 python-dotenv
 onnxruntime
+psutil
