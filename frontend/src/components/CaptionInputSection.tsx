@@ -91,7 +91,10 @@ export function CaptionInputSection() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const res = await fetch('http://127.0.0.1:8000/input_image', {
+      const rawBackend = process.env.Python_Backend || process.env.NEXT_PUBLIC_PYTHON_BACKEND;
+      const backendUrl = rawBackend ? rawBackend.replace(/\/+$/, '') : 'http://127.0.0.1:8000';
+
+      const res = await fetch(`${backendUrl}/input_image`, {
         method: 'POST',
         body: formData,
       });
