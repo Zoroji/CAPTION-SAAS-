@@ -4,8 +4,7 @@ import faiss, numpy as np, uvicorn
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
-from optimum.onnxruntime import ORTModelForCustomTasks
-from transformers import CLIPProcessor
+import onnxruntime as ort
 from LLM_call import calling_LLM
 
 app = FastAPI()
@@ -31,25 +30,46 @@ METADATA_FILE = VECTOR_DIR / "instagram_metadata.json"
 index = faiss.read_index(str(INDEX_FILE)) if INDEX_FILE.exists() else None
 metadata = json.loads(METADATA_FILE.read_text("utf-8")) if METADATA_FILE.exists() else []
 
-# Pre-load Quantized ONNX Model & Processor at startup for 0ms request latency
-ONNX_MODEL_DIR = Path(__file__).resolve().parent / "onnx_clip_quantized"
-model = ORTModelForCustomTasks.from_pretrained(
-    str(ONNX_MODEL_DIR),
-    file_name="model_quantized.onnx"
-)
-processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+# ponytail: Pure numpy/PIL preprocessor replaces 270MB transformers CLIPProcessor
+CLIP_MEAN = np.array([0.48145466, 0.4578275, 0.40821073], dtype=np.float32).reshape(1, 1, 3)
+CLIP_STD  = np.array([0.26862954, 0.26130258, 0.27577711], dtype=np.float32).reshape(1, 1, 3)
+
+def preprocess(img: Image.Image) -> np.ndarray:
+    img = img.convert("RGB")
+    w, h = img.size
+    scale = 224.0 / min(w, h)
+    img = img.resize((int(round(w * scale)), int(round(h * scale))), Image.Resampling.BICUBIC)
+    left, top = (img.width - 224) // 2, (img.height - 224) // 2
+    arr = (np.asarray(img.crop((left, top, left + 224, top + 224)), dtype=np.float32) / 255.0 - CLIP_MEAN) / CLIP_STD
+    return np.transpose(arr, (2, 0, 1))[np.newaxis, ...]
+
+# ponytail: Lazy load ONNX session on first request to keep idle RAM under 115 MB
+session = None
+
+def get_session():
+    global session
+    if session is None:
+        model_path = Path(__file__).resolve().parent / "onnx_clip_quantized" / "model_quantized.onnx"
+        opts = ort.SessionOptions()
+        opts.enable_cpu_mem_arena = False
+        session = ort.InferenceSession(str(model_path), sess_options=opts, providers=["CPUExecutionProvider"])
+    return session
 
 
 @app.post("/input_image")
 async def process_image(file: UploadFile = File(...)):
     raw_bytes = await file.read()
-    img = Image.open(io.BytesIO(raw_bytes)).convert("RGB")
+    img = Image.open(io.BytesIO(raw_bytes))
     img_base64 = base64.b64encode(raw_bytes).decode("utf-8")
     
-    inputs = processor(text=["a photo"], images=img, return_tensors="np")
-    outputs = model(**inputs)
-    
-    vec = outputs.image_embeds[0]
+    sess = get_session()
+    ort_inputs = {
+        "input_ids": np.array([[49406, 320, 1125, 49407]], dtype=np.int64),
+        "pixel_values": preprocess(img),
+        "attention_mask": np.array([[1, 1, 1, 1]], dtype=np.int64)
+    }
+    outputs = sess.run(["image_embeds"], ort_inputs)
+    vec = outputs[0][0]
     vec = (vec / (np.linalg.norm(vec) or 1)).astype(np.float32).reshape(1, -1)
 
     similar_results = []

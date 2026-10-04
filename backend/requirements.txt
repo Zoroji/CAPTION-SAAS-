@@ -1,4 +1,3 @@
-transformers
 fastapi
 uvicorn
 python-multipart
@@ -7,4 +6,4 @@ faiss-cpu
 numpy
 groq
 python-dotenv
-optimum[onnxruntime]
+onnxruntime
