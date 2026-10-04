@@ -12,6 +12,9 @@ instagram_data2/
 # Explicitly track public asset for feed preview
 !frontend/public/instagram_post_sample.png
 
+# Raw intermediate ONNX export directory
+backend/onnx_clip/
+
 
 
 # Large CSV & JSON result files
