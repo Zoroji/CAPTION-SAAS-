@@ -50,3 +50,9 @@ ENV/
 *.tar.gz
 *.7z
 .env
+
+
+#raw vectors not needed 
+vectors/embeddings.npy
+vectors/image_ids.json
+*.npy
